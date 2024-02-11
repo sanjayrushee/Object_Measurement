@@ -1,50 +1,38 @@
 import cv2
-import utlis
+import numpy as np
 
-# Set up webcam
-webcam = True
+def getContours(img, minArea=1000, filter=0, draw=False):
+    # Check if the input image is empty
+    if img is None:
+        print("Error: Input image is empty")
+        return None, []
 
-# Open the webcam
-cap = cv2.VideoCapture(0)
+    # Convert image to grayscale
+    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# Set the resolution of the capture
-cap.set(3, 1920)
-cap.set(4, 1080)
-
-# Define the scale for measurements
-scale = 3
-
-while True:
-    # Read the frame from the webcam
-    success, img = cap.read()
-
-    if not success:
-        print("Failed to read from webcam")
-        break
-
-    # Get contours from the image
-    img, finalContours = utlis.getContours(img, minArea=1000, filter=4, draw=False)
-
-    # Measure objects
-    for cnt in finalContours:
+    # Apply Gaussian blur
+    imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 0)
+    
+    # Perform adaptive thresholding
+    _, imgThresh = cv2.threshold(imgBlur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    
+    # Perform morphological operations
+    kernel = np.ones((5, 5), np.uint8)
+    imgMorph = cv2.morphologyEx(imgThresh, cv2.MORPH_CLOSE, kernel)
+    
+    # Find contours
+    contours, _ = cv2.findContours(imgMorph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Filter contours based on area and number of vertices
+    finalContours = []
+    for cnt in contours:
         area = cv2.contourArea(cnt)
-        if area > 1000:  # Filter out small contours
-            perimeter = cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt, 0.02 * perimeter, True)
-            x, y, w, h = cv2.boundingRect(approx)
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(img, f'Width: {w / scale:.2f} cm', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            cv2.putText(img, f'Height: {h / scale:.2f} cm', (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        if area > minArea:
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+            if len(approx) == filter:
+                finalContours.append(cnt)
+                if draw:
+                    cv2.drawContours(img, [cnt], -1, (255, 0, 255), 2)
 
-    # Display the original image with contours and measurements
-    cv2.imshow('Camera View', img)
-
-    # Exit the loop if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Release the capture device
-cap.release()
-
-# Close all OpenCV windows
-cv2.destroyAllWindows()
+    return img, finalContours
