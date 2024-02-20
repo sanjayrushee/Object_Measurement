@@ -16,6 +16,11 @@ cap.set(4, 1080)
 scale = 3
 wP = 210 * scale
 hP = 297 * scale
+
+# Parameters for the moving average filter
+N = 5  # Number of measurements to average
+length_buffer = []  # Buffer for storing recent length measurements
+breadth_buffer = []  # Buffer for storing recent breadth measurements
 ###################################
 
 while True:
@@ -44,9 +49,23 @@ while True:
             length_cm = w * pixel_to_cm
             breadth_cm = h * pixel_to_cm
 
+            # Store recent measurements in the buffers
+            length_buffer.append(length_cm)
+            breadth_buffer.append(breadth_cm)
+
+            # Keep only the last N measurements in the buffers
+            if len(length_buffer) > N:
+                length_buffer.pop(0)
+            if len(breadth_buffer) > N:
+                breadth_buffer.pop(0)
+
+            # Calculate the average length and breadth
+            avg_length = sum(length_buffer) / len(length_buffer)
+            avg_breadth = sum(breadth_buffer) / len(breadth_buffer)
+
             # Display length and breadth on the image
-            cv2.putText(img, f"Length: {length_cm:.2f} cm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
-            cv2.putText(img, f"Breadth: {breadth_cm:.2f} cm", (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
+            cv2.putText(img, f"Length: {avg_length:.2f} cm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
+            cv2.putText(img, f"Breadth: {avg_breadth:.2f} cm", (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
 
     cv2.imshow('Result', img)
 
