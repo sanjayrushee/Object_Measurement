@@ -52,11 +52,15 @@ def objectMeasurement():
 
 root = Tk()
 
-root.geometry("1224x874")
+root.geometry("1360x710")
+root.title("Object Measurement")
 bg = PhotoImage( file = "background.png") 
   
 # Show image using label 
 label1 = Label( root, image = bg) 
-label1.place(x = 0,y = 0) 
+label1.place(x = 0,y = 0)
+button_image = PhotoImage(file="btn.png")
+button = Button( image=button_image,command = objectMeasurement , bd=0, highlightthickness=0, bg="#6325CE", activebackground="#6325CE")
+button.place(x=482, y=600)
 
 root.mainloop()
