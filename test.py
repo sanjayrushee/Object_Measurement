@@ -1,17 +1,18 @@
 import cv2
 from tkinter import *
+import threading 
+
+# Global variable to control the thread
+running = False
 
 def objectMeasurement():
+    global running
     cap = cv2.VideoCapture(0)
-
     pixel_to_cm = 0.05  
-
     min_area_threshold = 100  
 
-    while True:
-        
+    while running:
         ret, frame = cap.read()
-        
         # Convert frame to grayscale
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -37,7 +38,6 @@ def objectMeasurement():
                 cv2.putText(frame, f"Length: {length_cm:.2f} cm", (x, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                 
                 cv2.putText(frame, f"Breadth: {breadth_cm:.2f} cm", (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-
         cv2.imshow("Result", frame)
         
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -47,14 +47,14 @@ def objectMeasurement():
     cv2.destroyAllWindows()
     
 def btn_clicked():
-    global click 
-    if not click:
+    global running 
+    if not running:
         button.config(image=cancel)
-        click = True
-        objectMeasurement() 
+        running = True
+        threading.Thread(target=objectMeasurement).start()
     else:
-        button.config(image=measure_now)   
-        click = False
+        button.config(image=measure_now)
+        running = False
 
 root = Tk()
 root.geometry("1360x710")
@@ -65,7 +65,7 @@ label1 = Label( root, image = bg)
 label1.place(x = 0,y = 0)
 measure_now = PhotoImage(file="btn.png")
 cancel = PhotoImage(file="btn2.png")
-click = False
+running = False
 button = Button( image=measure_now,command = btn_clicked , bd=0, highlightthickness=0, bg="#6325CE", activebackground="#6325CE")
 button.place(x=482, y=600)
 
