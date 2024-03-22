@@ -17,6 +17,8 @@ def objectMeasurement():
     pixel_to_cm = 0.05  
 
     min_area_threshold = 100  
+    cv2.resizeWindow("Resized_Window", 300, 700) 
+
 
 
     while True:
