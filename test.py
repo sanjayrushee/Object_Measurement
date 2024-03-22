@@ -1,17 +1,7 @@
 import cv2
 from tkinter import *
 
-
-root = Tk()
-
-root.geometry("1360x710")
-root.title("Object Measurement")
 def objectMeasurement():
-    button_image = PhotoImage(file="btn2.png")
-    button = Button( image=button_image , bd=0, highlightthickness=0, bg="white", activebackground="#ffffff")
-    button.place(x=482, y=600)
-
-
     cap = cv2.VideoCapture(0)
 
     pixel_to_cm = 0.05  
@@ -56,18 +46,27 @@ def objectMeasurement():
     cap.release()
     cv2.destroyAllWindows()
     
+def btn_clicked():
+    global click 
+    if not click:
+        button.config(image=cancel)
+        click = True
+        objectMeasurement() 
+    else:
+        button.config(image=measure_now)   
+        click = False
 
-
-
-
-
+root = Tk()
+root.geometry("1360x710")
+root.title("Object Measurement")
 bg = PhotoImage( file = "background.png") 
-  
 # Show image using label 
 label1 = Label( root, image = bg) 
 label1.place(x = 0,y = 0)
-button_image = PhotoImage(file="btn.png")
-button = Button( image=button_image,command = objectMeasurement , bd=0, highlightthickness=0, bg="#6325CE", activebackground="#6325CE")
+measure_now = PhotoImage(file="btn.png")
+cancel = PhotoImage(file="btn2.png")
+click = False
+button = Button( image=measure_now,command = btn_clicked , bd=0, highlightthickness=0, bg="#6325CE", activebackground="#6325CE")
 button.place(x=482, y=600)
 
 root.mainloop()
