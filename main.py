@@ -2,8 +2,15 @@ import cv2
 from tkinter import *
 
 
+root = Tk()
 
+root.geometry("1360x710")
+root.title("Object Measurement")
 def objectMeasurement():
+    button_image = PhotoImage(file="btn2.png")
+    button = Button( image=button_image , bd=0, highlightthickness=0, bg="white", activebackground="#ffffff")
+    button.place(x=482, y=600)
+
 
     cap = cv2.VideoCapture(0)
 
@@ -11,7 +18,9 @@ def objectMeasurement():
 
     min_area_threshold = 100  
 
+
     while True:
+        
         ret, frame = cap.read()
         
         # Convert frame to grayscale
@@ -47,13 +56,12 @@ def objectMeasurement():
 
     cap.release()
     cv2.destroyAllWindows()
+    
 
 
 
-root = Tk()
 
-root.geometry("1360x710")
-root.title("Object Measurement")
+
 bg = PhotoImage( file = "background.png") 
   
 # Show image using label 
